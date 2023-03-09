@@ -1,5 +1,3 @@
-// Copyright(c) 2023, Matthew, All rights reserved.
-
 #ifndef NARCCISSUS_FACE_HPP
 #define NARCCISSUS_FACE_HPP
 

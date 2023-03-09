@@ -1,5 +1,3 @@
-// Copyright(c) 2023, Matthew, All rights reserved.
-
 #ifndef NARCCISSUS_PATH_HPP
 #define NARCCISSUS_PATH_HPP
 
