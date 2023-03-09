@@ -52,6 +52,7 @@ std::vector<Face<type>> read(std::ifstream obj) {
     std::vector<Vector<type>> vertices;
     std::vector<std::array<uint64_t, 4>> indices;
 
+    int normals = 0;
     std::string line;
     while (std::getline(obj, line)) {
         if (line.substr(0, 2) == "v ") {
@@ -67,7 +68,27 @@ std::vector<Face<type>> read(std::ifstream obj) {
         } else if (line.substr(0, 2) == "f ") {
             std::istringstream ss_indices(line.substr(2));
             uint64_t i, j, k;
-            ss_indices >> i >> j >> k;
+            switch (normals) {
+                case 1:
+                    ss_indices >> i >> j >> k;
+                    indices.push_back({i - 1, j - 1, k - 1, static_cast<uint64_t>(materials.size() - 1)});
+                    break;
+                case 2:
+                    char x;
+                    ss_indices >> i >> x >> x >> x >> j >> x >> x >> x >> k;
+                    indices.push_back({i - 1, j - 1, k - 1, static_cast<uint64_t>(materials.size() - 1)});
+                    break;
+                default:
+                    ss_indices >> i;
+                    if (ss_indices.peek() != '/') {
+                        ss_indices >> j >> k;
+                        normals = 1;
+                    } else {
+                        ss_indices >> x >> x >> x >> j >> x >> x >> x >> k;
+                        normals = 2;
+                    }
+                    break;
+            }
             indices.push_back({i - 1, j - 1, k - 1, static_cast<uint64_t>(materials.size() - 1)});
         }
     }

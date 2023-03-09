@@ -67,8 +67,6 @@ public:
         return pow(4 * nrcc::pi * length(r, v) * 1e9 / nrcc::lightspeed, -2);
     }
 
-    type power(const int &r, const vect &v) {}
-
     Path(const Ray &r) : rays{r}, faces(), max_reflections(2) {}
 
     Path(const Ray &r, const int &rs) : rays{r}, faces(), max_reflections(rs) {}

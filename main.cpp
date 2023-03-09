@@ -93,7 +93,7 @@ int main() {
     // TESTING OBJ READING
     std::cout << "\nTESTING FILE READING\n";
 
-    std::vector<Face> scene{read<float>(std::ifstream("../magnolia.obj"))};
+    std::vector<Face> scene{read<float>(std::ifstream("../diamond.obj"))};
 
     for (int i = 0; i < scene.size(); i++) {
         std::cout << "tri " << i << ": " << scene[i] << "\n";
