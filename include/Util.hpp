@@ -22,6 +22,10 @@ namespace nrcc {
 
     double pi = std::numbers::pi;
 
+    double impedence = 377;
+
+    double permeability = 1.25663706e-6;
+
     std::complex<double> j = std::complex<double>(0, 1);
 
     double golden_angle = pi * (3 - sqrt(5));

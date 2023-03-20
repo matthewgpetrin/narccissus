@@ -3,6 +3,8 @@
 #ifndef NARCCISSUS_PATH_HPP
 #define NARCCISSUS_PATH_HPP
 
+#include <vector>
+
 #include "Wave.hpp"
 #include "Face.hpp"
 
