@@ -107,6 +107,40 @@ Vec3<type> cross(const Vec3<type> &v, const Vec3<type> &w) {
     return {x, y, z};
 }
 
+namespace nrcc {
+    template<typename type>
+    Vec3 <type> exp(const Vec3 <type> &v) {
+        Vec3<type> v2 = v * v;
+        Vec3<type> v3 = v * v * v;
+        return 1 + v + v2 / 2 + v3 / 6;
+    }
+}
+
+template<typename type>
+Vec3<type> rotation(const Vec3<type> &v, const Vec3<type> &k, const type &a) {
+    return v * std::cos(a) + cross(k, v) * std::sin(a) + k * (1 - std::cos(a)) * dot(k, v);
+}
+
+template<typename type>
+Vec3<type> shifted(const Vec3<type> &v, const Vec3<type> &a, const Vec3<type> &b) {
+    Vec3<type> k = (a.unit() + b.unit()).unit();
+    Vec3<type> w = nrcc::rotation(v, k, nrcc::pi);
+    return w.unit() * -1;
+}
+
+template<typename type>
+Vec3<std::complex<type>> shifted(const Vec3<std::complex<type>> &v, const Vec3<type> &a, const Vec3<type> &b) {
+    Vec3<type> r = {v.x.real(), v.y.real(), v.z.real()};
+    Vec3<type> i = {v.x.imag(), v.y.imag(), v.z.imag()};
+    Vec3<type> k = (a.unit() + b.unit()).unit();
+    Vec3<type> wr = nrcc::rotation(r, k, nrcc::pi);
+    Vec3<type> wi = nrcc::rotation(i, k, nrcc::pi);
+    return {{-wr.x, -wi.x},
+            {-wr.y, -wi.y},
+            {-wr.z, -wi.z}};
+
+}
+
 // OSTREAM OVERLOAD
 template<typename type>
 std::ostream &operator<<(std::ostream &os, const Vec3<type> &v) {

@@ -7,28 +7,28 @@
 
 template<typename type>
 class Wave {
+    using cmpx = std::complex<type>;
+    using VecC = Vec3<cmpx>;
     using Vec3 = Vec3<type>;
 
 public:
     // VARIABLES
     const Vec3 origin;
-    const Vec3 direct;
+    const VecC direct;
 
-    const type EL;
-    const type AZ;
+    //const type EL;
+    //const type AZ;
 
     const type power;
-    const type phase;
+    const type delay;
     const type frequency;
-
-    const Vec3 E_polarization = {0, 0, 1};
-    const Vec3 H_polarization = {1, 0, 0};
+    const VecC polarization;
 
     // CONSTRUCTORS
-    Wave(const Vec3 &o, const Vec3 &d, const type &pow, const type &fre, const type &del)
-            : origin(o), direct(d), power(pow), phase(del), frequency(fre), EL(d.EL()), AZ(d.AZ()) {}
+    Wave(const Vec3 &o, const VecC &d, const type &P, const type &f, const type &t, const VecC &p)
+            : origin(o), direct(d), power(P), delay(t), frequency(f), polarization(shifted(p, {1, 0, 0}, d)) {}
 
-    Wave(const Vec3 &o, const Vec3 &el, const Vec3 &az) : origin(o), direct({el, az}), EL(el), AZ(az) {}
+    //Wave(const Vec3 &o, const Vec3 &el, const Vec3 &az) : origin(o), direct({el, az}) {}
 
     type wavenumber() const {
         return 2 * nrcc::pi / wavelength();
@@ -38,31 +38,45 @@ public:
         return nrcc::lightspeed / frequency;
     }
 
-    std::complex<type> shift(const type &distance) {
-        return std::exp(-nrcc::j * wavenumber() * distance + phase);
+    VecC wavevector() const {
+        return direct * wavenumber();
     }
 
-    type eAmplitude(const type distance) {
-        return std::sqrt(30 * power / (distance * wavelength() * 4 * nrcc::pi));
+    type amplitude(const Vec3 &r) const {
+        return 3;
     }
 
-    type mAmplitude(const type distance) {
-        return std::sqrt(120 * power / (distance * wavelength() * 4 * nrcc::pi));
+    cmpx phase(const Vec3 &r) const {
+        cmpx x(r.x, 0);
+        cmpx y(r.y, 0);
+        cmpx z(r.z, 0);
+        return std::exp(nrcc::j * dot(wavevector(), {x, y, z}) + nrcc::j * delay);
     }
 
-    std::array<std::complex<type>, 3> eField(const type &distance) {
-        std::complex<type> x = eAmplitude(distance) * E_polarization.x * shift(distance);
-        std::complex<type> y = eAmplitude(distance) * E_polarization.y * shift(distance);
-        std::complex<type> z = eAmplitude(distance) * E_polarization.z * shift(distance);
+    VecC electricField(const Vec3 &r) const {
+        cmpx x = amplitude(r) * phase(r) * polarization.x;
+        cmpx y = amplitude(r) * phase(r) * polarization.y;
+        cmpx z = amplitude(r) * phase(r) * polarization.z;
+
         return {x, y, z};
     }
 
-    std::array<std::complex<type>, 3> mField(const type &distance) {
-        std::complex<type> x = eAmplitude(distance) * H_polarization.x * shift(distance) * (1 / nrcc::permeability);
-        std::complex<type> y = eAmplitude(distance) * H_polarization.y * shift(distance) * (1 / nrcc::permeability);
-        std::complex<type> z = eAmplitude(distance) * H_polarization.z * shift(distance) * (1 / nrcc::permeability);
-        return {x, y, z};
+    VecC magneticField(const Vec3 &r) const {
+        return cross(electricField(r), direct) / (nrcc::lightspeed * nrcc::lightspeed);
     }
+
+    // Polarization is represented as vector of complex numbers. The real and imaginary components represent
+    // a linear combination of two vectors that are orthogonal to each other. This, when included in the
+    // calculation for the E and H fields allows for the phase to react to non linear polarizations that rotate with phase
+    //
+    // Examples:
+    // {0, 1, 0} j{0, 0, 0} Linearly polarized horizontally
+    // {0, 0, 1} j{0, 0, 0} Linearly polarized vertically
+    // {0, 0, 1} j{0, 1, 0} Circular polarized clockwise
+    // {0, 0, 2} j{0, 1, 0} Elliptically polarized clockwise
+    //
+    // Note that the input parameters assume a ray with direction {1, 0, 0}. This is for ease of use, the actual
+    // vectors of the polarization are computed in the initializer list using shifted().
 };
 
 // OSTREAM

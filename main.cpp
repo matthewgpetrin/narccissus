@@ -80,8 +80,12 @@ int main() {
 
     std::cout << "\nTESTING RAY CONSTRUCTORS\n";
 
-    Wave w01 = {{1, 0, 1},
-                {1, 0, 0}};
+    Wave w01 = {{1,      0,      1},
+                {1,      1,      1},
+                1,
+                nrcc::pi / 2,
+                2.4e9,
+                {{0, 0}, {0, 0}, {1, 0}}};
     std::cout << "w01: " << w01 << "\n";
 
     // TESTING PATH
@@ -104,17 +108,17 @@ int main() {
                 {5, -2, 0}};
     std::cout << "f03: " << f03 << "\n\n";
 
-    std::cout << "int dist: " << rt01.intersectionDistance(w01, f03) << "\n";
-    std::cout << "int vect: " << rt01.intersectionVector(w01, f03) << "\n";
-    std::cout << "ref vect: " << rt01.reflectionVector(w01, f03) << "\n";
+    //std::cout << "int dist: " << rt01.intersectionDistance(w01, f03) << "\n";
+    //std::cout << "int vect: " << rt01.intersectionVector(w01, f03) << "\n";
+    //std::cout << "ref vect: " << rt01.reflectionVector(w01, f03) << "\n";
 
     std::cout << "\nTESTING RAY SPHERE METHODS\n";
 
     Vec3 center = {5, 0, 1};
     float radius = 1;
 
-    std::cout << "int dist: " << rt01.intersectionDistance(w01, center, radius) << "\n";
-    std::cout << "int vect: " << rt01.intersectionVector(w01, center, radius) << "\n";
+    //std::cout << "int dist: " << rt01.intersectionDistance(w01, center, radius) << "\n";
+    //std::cout << "int vect: " << rt01.intersectionVector(w01, center, radius) << "\n";
 
     std::cout << "\nTESTING TRACE\n";
 
@@ -127,5 +131,5 @@ int main() {
     Path p02 = rt01.trace(w01, m02);
     std::cout << "p02: " << p02;
 
-    
+
 }
