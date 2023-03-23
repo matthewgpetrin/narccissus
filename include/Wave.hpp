@@ -14,7 +14,7 @@ class Wave {
 public:
     // VARIABLES
     const Vec3 origin;
-    const VecC direct;
+    const Vec3 direct;
 
     //const type EL;
     //const type AZ;
@@ -25,8 +25,13 @@ public:
     const VecC polarization;
 
     // CONSTRUCTORS
-    Wave(const Vec3 &o, const VecC &d, const type &P, const type &f, const type &t, const VecC &p)
-            : origin(o), direct(d), power(P), delay(t), frequency(f), polarization(shifted(p, {1, 0, 0}, d)) {}
+    Wave(const Vec3 &o, const Vec3 &d, const type &P, const type &f, const type &t, const VecC &p)
+            : origin(o), direct(d), power(P), delay(t), frequency(f), polarization{shifted({p}, {1, 0, 0}, d)} {}
+
+    Wave(const Vec3 &o, const Vec3 &d) : origin(o), direct(d), power(1), delay(), frequency(1e9),
+                                         polarization{shifted({{0, 0},
+                                                               {0, 0},
+                                                               {1, 0}}, {1, 0, 0}, d)} {}
 
     //Wave(const Vec3 &o, const Vec3 &el, const Vec3 &az) : origin(o), direct({el, az}) {}
 
@@ -38,7 +43,7 @@ public:
         return nrcc::lightspeed / frequency;
     }
 
-    VecC wavevector() const {
+    Vec3 wavevector() const {
         return direct * wavenumber();
     }
 

@@ -124,7 +124,7 @@ Vec3<type> rotation(const Vec3<type> &v, const Vec3<type> &k, const type &a) {
 template<typename type>
 Vec3<type> shifted(const Vec3<type> &v, const Vec3<type> &a, const Vec3<type> &b) {
     Vec3<type> k = (a.unit() + b.unit()).unit();
-    Vec3<type> w = nrcc::rotation(v, k, nrcc::pi);
+    Vec3<type> w = rotation(v, k, nrcc::pi);
     return w.unit() * -1;
 }
 
@@ -133,8 +133,8 @@ Vec3<std::complex<type>> shifted(const Vec3<std::complex<type>> &v, const Vec3<t
     Vec3<type> r = {v.x.real(), v.y.real(), v.z.real()};
     Vec3<type> i = {v.x.imag(), v.y.imag(), v.z.imag()};
     Vec3<type> k = (a.unit() + b.unit()).unit();
-    Vec3<type> wr = nrcc::rotation(r, k, nrcc::pi);
-    Vec3<type> wi = nrcc::rotation(i, k, nrcc::pi);
+    Vec3<type> wr = rotation(r, k, nrcc::pi);
+    Vec3<type> wi = rotation(i, k, nrcc::pi);
     return {{-wr.x, -wi.x},
             {-wr.y, -wi.y},
             {-wr.z, -wi.z}};
