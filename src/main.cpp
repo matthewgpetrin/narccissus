@@ -1,12 +1,14 @@
-#include "include/Vec3.hpp"
-#include "include/Face.hpp"
-#include "include/Mesh.hpp"
-#include "include/Wave.hpp"
-#include "include/Path.hpp"
-#include "include/Nrcc.hpp"
+#include <iomanip>
+#include "../include/Vec3.hpp"
+#include "../include/Face.hpp"
+#include "../include/Mesh.hpp"
+#include "../include/Wave.hpp"
+#include "../include/Path.hpp"
+#include "../include/Nrcc.hpp"
 
 int main() {
     // TESTING VEC3
+    using VecC = Vec3<std::complex<float>>;
     using Vec3 = Vec3<float>;
 
     std::cout << "\nTESTING VECTOR CONSTRUCTORS\n";
@@ -80,12 +82,8 @@ int main() {
 
     std::cout << "\nTESTING RAY CONSTRUCTORS\n";
 
-    Wave w01 = {{1,      0,      1},
-                {1,      1,      1},
-                1,
-                nrcc::pi / 2,
-                2.4e9,
-                {{0, 0}, {0, 0}, {1, 0}}};
+    Wave w01 = {{1, 0, 1},
+                {1, 0, 0}};
     std::cout << "w01: " << w01 << "\n";
 
     // TESTING PATH
@@ -131,5 +129,5 @@ int main() {
     Path p02 = rt01.trace(w01, m02);
     std::cout << "p02: " << p02;
 
-
+    return 0;
 }

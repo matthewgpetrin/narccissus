@@ -6,8 +6,9 @@
 #include <array>
 #include <cmath>
 #include <iostream>
-
-#include "Util.hpp"
+#include <random>
+#include <chrono>
+#include <complex>
 
 template<typename type>
 struct Vec3 {
@@ -36,11 +37,12 @@ struct Vec3 {
     }
 
     Vec3 unit() const {
-        if (norm() == 1) return *this;
-        else return {x / norm(), y / norm(), z / norm()};
+        return {x / norm(), y / norm(), z / norm()};
     }
 
     // CONSTRUCTORS
+    Vec3(const Vec3 &v) : v{v.x, v.y, v.z} {}
+
     Vec3(const type &x, const type &y, const type &z) : v{x, y, z} {}
 
     Vec3(const type &el, const type &az) : v{std::cos(el) * std::cos(az), std::cos(el) * std::sin(az), std::sin(el)} {}
@@ -72,79 +74,81 @@ struct Vec3 {
 };
 
 // COORDINATE CONVERSIONS
-template<typename type>
-std::array<type, 2> spherical(const Vec3<type> &v) {
+template<typename T>
+std::array<T, 2> spherical(const Vec3<T> &v) {
     return {std::asin(v.z / v.norm()), std::atan2(v.y, v.x)};
 }
 
-template<typename type>
-std::array<type, 3> cartesian(const type &el, const type &az) {
-    type x = std::cos(el) * std::cos(az);
-    type y = std::cos(el) * std::sin(az);
-    type z = std::sin(el);
+template<typename T>
+std::array<T, 3> cartesian(const T &el, const T &az) {
+    T x = std::cos(el) * std::cos(az);
+    T y = std::cos(el) * std::sin(az);
+    T z = std::sin(el);
     return {x, y, z};
 }
 
 // VECTOR MATHEMATICS
-template<typename type>
-type dot(const Vec3<type> &v, const Vec3<type> &w) {
-    return v.x * w.x + v.y * w.y + v.z * w.z;
-}
-
-template<typename type>
-type distance(const Vec3<type> &v, const Vec3<type> &w) {
-    type a = v.x - w.x;
-    type b = v.y - w.y;
-    type c = v.z - w.z;
+template<typename T>
+T distance(const Vec3<T> &v, const Vec3<T> &w) {
+    T a = v.x - w.x;
+    T b = v.y - w.y;
+    T c = v.z - w.z;
     return std::sqrt((a * a) + (b * b) + (c * c));
 }
 
-template<typename type>
-Vec3<type> cross(const Vec3<type> &v, const Vec3<type> &w) {
-    type x = v.y * w.z - v.z * w.y;
-    type y = v.z * w.x - v.x * w.z;
-    type z = v.x * w.y - v.y * w.x;
+// COMPLEX VECTOR MATHEMATICS
+template<typename T>
+Vec3<T> exp(const Vec3<T> &v) {
+    Vec3<T> v2 = v * v;
+    Vec3<T> v3 = v * v * v;
+    return 1 + v + v2 / 2 + v3 / 6;
+}
+
+template<typename T, typename U>
+T dot(const Vec3<T> &v, const Vec3<U> &w) {
+    return v.x * w.x + v.y * w.y + v.z * w.z;
+}
+
+template<typename T, typename U>
+Vec3<T> cross(const Vec3<T> &v, const Vec3<U> &w) {
+    T x = v.y * w.z - v.z * w.y;
+    T y = v.z * w.x - v.x * w.z;
+    T z = v.x * w.y - v.y * w.x;
     return {x, y, z};
 }
 
-namespace nrcc {
-    template<typename type>
-    Vec3 <type> exp(const Vec3 <type> &v) {
-        Vec3<type> v2 = v * v;
-        Vec3<type> v3 = v * v * v;
-        return 1 + v + v2 / 2 + v3 / 6;
-    }
+template<typename T, typename U>
+Vec3<T> shift(const Vec3<T> &v, const Vec3<U> &w) {
+    Vec3<T> x = cross(v, w);
+    return cross(x, w) * -1;
 }
 
-template<typename type>
-Vec3<type> rotation(const Vec3<type> &v, const Vec3<type> &k, const type &a) {
-    return v * std::cos(a) + cross(k, v) * std::sin(a) + k * (1 - std::cos(a)) * dot(k, v);
+template<typename T>
+Vec3<T> real(const Vec3<std::complex<T>> &v) {
+    return {v.x.real(), v.y.real(), v.z.real()};
 }
 
-template<typename type>
-Vec3<type> shifted(const Vec3<type> &v, const Vec3<type> &a, const Vec3<type> &b) {
-    Vec3<type> k = (a.unit() + b.unit()).unit();
-    Vec3<type> w = rotation(v, k, nrcc::pi);
-    return w.unit() * -1;
-}
+template<typename T>
+Vec3<T> randomVector() {
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
-template<typename type>
-Vec3<std::complex<type>> shifted(const Vec3<std::complex<type>> &v, const Vec3<type> &a, const Vec3<type> &b) {
-    Vec3<type> r = {v.x.real(), v.y.real(), v.z.real()};
-    Vec3<type> i = {v.x.imag(), v.y.imag(), v.z.imag()};
-    Vec3<type> k = (a.unit() + b.unit()).unit();
-    Vec3<type> wr = rotation(r, k, nrcc::pi);
-    Vec3<type> wi = rotation(i, k, nrcc::pi);
-    return {{-wr.x, -wi.x},
-            {-wr.y, -wi.y},
-            {-wr.z, -wi.z}};
+    std::default_random_engine generator(seed);
 
+    std::uniform_real_distribution<T> distribution(0.0, 1.0);
+
+    T u = distribution(generator);
+    T v = distribution(generator);
+
+    T EL = std::acos(1 - 2 * u) - (std::numbers::pi_v<T> / 2);
+    T AZ = 2 * std::numbers::pi_v<T> * v;
+
+    return {EL, AZ};
 }
 
 // OSTREAM OVERLOAD
-template<typename type>
-std::ostream &operator<<(std::ostream &os, const Vec3<type> &v) {
-    os << "{" << v.x << ", " << v.y << ", " << v.z << "}";
+template<typename T>
+std::ostream &operator<<(std::ostream &os, const Vec3<T> &v) {
+    os << "" << v.x << ", " << v.y << ", " << v.z << ";";
     return os;
 }
 

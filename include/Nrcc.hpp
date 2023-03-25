@@ -30,7 +30,7 @@ public:
         for (const auto &face: mesh.faces) {
             type new_distance = intersectionDistance(wave, face);
 
-            if (new_distance > nrcc::epsilon<type> && new_distance < min_distance) {
+            if (new_distance > nrcc::epsilon && new_distance < min_distance) {
                 if (reflected) {
                     waves.pop_back();
                     faces.pop_back();
@@ -60,7 +60,7 @@ public:
 
         type det = dot(face.bounds[0], p_vec);
 
-        if (fabs(det) < nrcc::epsilon<type>) return -1;
+        if (fabs(det) < nrcc::epsilon) return -1;
 
         Vec3 t_vec = wave.origin - face.points[0];
 
@@ -124,7 +124,7 @@ public:
         for (const auto &face: mesh.faces) {
             type new_distance = intersectionDistance(wave, face);
 
-            if (new_distance > nrcc::epsilon<type> && new_distance < min_distance) {
+            if (new_distance > nrcc::epsilon && new_distance < min_distance) {
                 if (reflected) {
                     waves.pop_back();
                     faces.pop_back();

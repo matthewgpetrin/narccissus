@@ -4,6 +4,7 @@
 #define NARCCISSUS_WAVE_HPP
 
 #include "Vec3.hpp"
+#include "Util.hpp"
 
 template<typename type>
 class Wave {
@@ -21,19 +22,16 @@ public:
 
     const type power;
     const type delay;
+    const VecC polar;
+
     const type frequency;
-    const VecC polarization;
 
     // CONSTRUCTORS
     Wave(const Vec3 &o, const Vec3 &d, const type &P, const type &f, const type &t, const VecC &p)
-            : origin(o), direct(d), power(P), delay(t), frequency(f), polarization{shifted({p}, {1, 0, 0}, d)} {}
+            : origin(o), direct(d), power(P), delay(t), frequency(f), polar{shift(p, d).unit()} {}
 
-    Wave(const Vec3 &o, const Vec3 &d) : origin(o), direct(d), power(1), delay(), frequency(1e9),
-                                         polarization{shifted({{0, 0},
-                                                               {0, 0},
-                                                               {1, 0}}, {1, 0, 0}, d)} {}
-
-    //Wave(const Vec3 &o, const Vec3 &el, const Vec3 &az) : origin(o), direct({el, az}) {}
+    Wave(const Vec3 &o, const Vec3 &d)
+            : origin(o), direct(d), power(1), delay(), frequency(1e9), polar{shift(nrcc::linear<type>, d).unit()} {}
 
     type wavenumber() const {
         return 2 * nrcc::pi / wavelength();
@@ -48,26 +46,23 @@ public:
     }
 
     type amplitude(const Vec3 &r) const {
-        return 3;
+        return power;
     }
 
     cmpx phase(const Vec3 &r) const {
-        cmpx x(r.x, 0);
-        cmpx y(r.y, 0);
-        cmpx z(r.z, 0);
-        return std::exp(nrcc::j * dot(wavevector(), {x, y, z}) + nrcc::j * delay);
+        return std::exp<type>(nrcc::j * dot(wavevector(), r) + nrcc::j * delay);
     }
 
     VecC electricField(const Vec3 &r) const {
-        cmpx x = amplitude(r) * phase(r) * polarization.x;
-        cmpx y = amplitude(r) * phase(r) * polarization.y;
-        cmpx z = amplitude(r) * phase(r) * polarization.z;
-
+        cmpx x = amplitude(r) * phase(r) * polar.x;
+        cmpx y = amplitude(r) * phase(r) * polar.y;
+        cmpx z = amplitude(r) * phase(r) * polar.z;
         return {x, y, z};
     }
 
     VecC magneticField(const Vec3 &r) const {
-        return cross(electricField(r), direct) / (nrcc::lightspeed * nrcc::lightspeed);
+        //return cross(electricField(r), direct) / (377);
+        return cross(electricField(r), direct);
     }
 
     // Polarization is represented as vector of complex numbers. The real and imaginary components represent
@@ -81,7 +76,7 @@ public:
     // {0, 0, 2} j{0, 1, 0} Elliptically polarized clockwise
     //
     // Note that the input parameters assume a ray with direction {1, 0, 0}. This is for ease of use, the actual
-    // vectors of the polarization are computed in the initializer list using shifted().
+    // vectors of the polar are computed in the initializer list using shifted().
 };
 
 // OSTREAM
