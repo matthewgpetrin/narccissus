@@ -36,7 +36,9 @@ public:
                     faces.pop_back();
                 }
 
-                waves.push_back({intersectionVector(wave, face), reflectionVector(wave, face)});
+                Wave wave = {intersectionVector(wave, face), reflectionVector(wave, face)};
+
+                waves.push_back(wave);
                 faces.push_back(face);
 
                 min_distance = new_distance;
