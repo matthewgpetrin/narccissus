@@ -148,7 +148,7 @@ Vec3<T> randomVector() {
 // OSTREAM OVERLOAD
 template<typename T>
 std::ostream &operator<<(std::ostream &os, const Vec3<T> &v) {
-    os << "" << v.x << ", " << v.y << ", " << v.z << ";";
+    os << "" << v.x << " " << v.y << " " << v.z << "";
     return os;
 }
 

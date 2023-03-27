@@ -40,12 +40,14 @@ private:
             std::cerr << "Error: Could not open file\n";
         }
 
-        std::vector<Face> faces;
         std::vector<Vec3> vertices;
         std::vector<std::string> materials;
-        std::vector<std::array<uint64_t, 4>> indices;
+        std::vector<std::array<uint64_t , 4>> indices;
 
-        int normals = 0;
+        int normals = -1;
+        char slash = '/';
+        std::string garbage;
+
         std::string line;
         while (std::getline(mesh, line)) {
             if (line.substr(0, 2) == "v ") {
@@ -53,35 +55,44 @@ private:
                 type x, y, z;
                 ss_vertex >> x >> y >> z;
                 vertices.push_back({x, y, z});
-            } else if (line.substr(0, 7) == "usemtl ") {
+            }
+            else if (line.substr(0, 7) == "usemtl ") {
                 std::istringstream ss_material(line.substr(7));
                 std::string material;
                 ss_material >> material;
                 materials.push_back(material);
-            } else if (line.substr(0, 2) == "f ") {
+            }
+            else if (line.substr(0, 2) == "f ") {
                 std::istringstream ss_indices(line.substr(2));
                 uint64_t i, j, k;
+                ss_indices >> i;
                 switch (normals) {
+                    case 0:
+                        ss_indices >> j >> k;
+                        break;
                     case 1:
-                        ss_indices >> i >> j >> k;
-                        indices.push_back({i - 1, j - 1, k - 1, static_cast<uint64_t>(materials.size() - 1)});
+                        ss_indices >> slash >> garbage >> j >> slash >> garbage >> k;
                         break;
                     case 2:
-                        char x;
-                        ss_indices >> i >> x >> x >> x >> j >> x >> x >> x >> k;
-                        indices.push_back({i - 1, j - 1, k - 1, static_cast<uint64_t>(materials.size() - 1)});
+                        ss_indices >> slash >> slash >> garbage >> j >> slash >> slash >>  garbage >> k;
                         break;
                     default:
-                        ss_indices >> i;
-                        if (ss_indices.peek() != '/') {
+                        if(ss_indices.peek() != slash){
                             ss_indices >> j >> k;
-                            normals = 1;
+                            normals = 0;
                         } else {
-                            ss_indices >> x >> x >> x >> j >> x >> x >> x >> k;
-                            normals = 2;
+                            ss_indices >> slash;
+                            if (ss_indices.peek() != slash){
+                                ss_indices >> garbage >> j >> slash >> garbage >> k;
+                                normals = 1;
+                            } else{
+                                ss_indices >> slash >> garbage >> j >> slash >> slash >> garbage >> k;
+                                normals = 2;
+                            }
                         }
                 }
-                indices.push_back({i - 1, j - 1, k - 1, static_cast<uint64_t>(materials.size() - 1)});
+
+                indices.push_back({i-1 , j-1, k-1, static_cast<uint64_t>(materials.size() - 1)});
             }
         }
 
@@ -89,14 +100,16 @@ private:
 
         indices.assign(set.begin(), set.end());
 
+        std::vector<Face> fs;
         for (const auto &idx: indices) {
             uint64_t a = idx[0];
             uint64_t b = idx[1];
             uint64_t c = idx[2];
-            faces.push_back({vertices[a], vertices[b], vertices[c]});
+            Face f = {vertices[a], vertices[b], vertices[c]};
+            fs.push_back({vertices[a], vertices[b], vertices[c]});
         }
 
-        return faces;
+        return fs;
     }
 };
 
