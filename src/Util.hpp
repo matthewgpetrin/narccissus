@@ -26,9 +26,10 @@ namespace nrcc {
 
     double permeability = 1.25663706e-6;
 
-    Vec3<std::complex<double>> linear = {{0, 0},
-                                         {0, 0},
-                                         {1, 0}};
+    template<typename T>
+    Vec3<std::complex<T>> linear = {{0, 0},
+                                    {0, 0},
+                                    {1, 0}};
 }
 
 #endif //NARCCISSUS_UTIL_HPP

@@ -31,7 +31,10 @@ public:
             : origin(o), direct(d), power(P), delay(t), frequency(f), polar{shift(p, d).unit()} {}
 
     Wave(const Vec3 &o, const Vec3 &d)
-            : origin(o), direct(d), power(1), delay(), frequency(1e9), polar{shift(nrcc::linear, d).unit()} {}
+            : origin(o), direct(d), power(1), delay(), frequency(1e9), polar{shift(nrcc::linear<type>, d).unit()} {}
+
+    Wave(const Wave &w) : origin(w.origin), direct(w.direct), power(w.power), delay(w.delay), frequency(w.frequency),
+                          polar(w.polar) {}
 
     type wavenumber() const {
         return 2 * nrcc::pi / wavelength();

@@ -111,8 +111,8 @@ Vec3<T> exp(const Vec3<T> &v) {
     return 1 + v + v2 / 2 + v3 / 6;
 }
 
-template<typename T, typename U>
-T dot(const Vec3<T> &v, const Vec3<U> &w) {
+template<typename T>
+T dot(const Vec3<T> &v, const Vec3<T> &w) {
     return v.x * w.x + v.y * w.y + v.z * w.z;
 }
 

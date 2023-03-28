@@ -23,6 +23,14 @@ public:
 
     Path(const std::vector<Wave> &waves, const std::vector<Face> &faces) : waves(waves), faces(faces) {}
 
+    const std::vector<Wave> &getWaves() const {
+        return waves;
+    }
+
+    const std::vector<Face> &getFaces() const {
+        return faces;
+    }
+
 private:
     // METHODS
     void pop() {

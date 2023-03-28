@@ -2,9 +2,6 @@ o = readmatrix("../data/fields_o.txt", 'Delimiter', ',');
 e = readmatrix("../data/fields_e.txt", 'Delimiter', ',');
 m = readmatrix("../data/fields_m.txt", 'Delimiter', ',');
 
-%d = a(1:2:end, :);
-%c = zeros(size(d));
-
 figure
 quiver3(o(:,1), o(:,2), o(:,3), e(:,1), e(:,2), e(:,3), 'b');
 hold on

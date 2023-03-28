@@ -36,9 +36,7 @@ public:
                     faces.pop_back();
                 }
 
-                Wave wave = {intersectionVector(wave, face), reflectionVector(wave, face)};
-
-                waves.push_back(wave);
+                waves.push_back({intersectionVector(wave, face), reflectionVector(wave, face)});
                 faces.push_back(face);
 
                 min_distance = new_distance;
@@ -46,7 +44,8 @@ public:
             }
         }
 
-        if (reflected && reflections > 1) return trace(waves, faces, mesh, reflections - 1);
+        if (reflected == 1 && reflections > 1) return trace(waves, faces, mesh, reflections - 1);
+
         else return {waves, faces};
     }
 
@@ -55,14 +54,13 @@ public:
 
     explicit Nrcc(const uint8_t &rs) : reflections(rs) {}
 
-private:
     // VECTOR - FACE METHODS
     type intersectionDistance(const Wave &wave, const Face &face) const {
         Vec3 p_vec = cross(wave.direct, face.bounds[1]);
 
         type det = dot(face.bounds[0], p_vec);
 
-        if (fabs(det) < nrcc::epsilon) return -1;
+        if (det < nrcc::epsilon) return -1;
 
         Vec3 t_vec = wave.origin - face.points[0];
 
@@ -78,13 +76,13 @@ private:
 
         return dot(face.bounds[1], q_vec) * (1 / det);
     }
-
+    
     Vec3 intersectionVector(const Wave &wave, const Face &face) const {
         return wave.direct * intersectionDistance(wave, face) + wave.origin;
     }
 
     Vec3 reflectionVector(const Wave &wave, const Face &face) const {
-        return wave.direct - face.normal() * 2 * dot(wave.direct, face.normal());
+        return wave.direct - face.normal() * dot(wave.direct, face.normal()) * 2;
     }
 
     // VECTOR - SPHERE METHODS
@@ -140,11 +138,9 @@ private:
             }
         }
 
-        if (reflected && rs > 1) {
-            std::cout << "reflected" << "\n";
-            return trace(waves, faces, mesh, rs - 1);
+        if (reflected && rs > 1) return trace(waves, faces, mesh, rs - 1);
 
-        } else return {waves, faces};
+        else return {waves, faces};
     }
 };
 
