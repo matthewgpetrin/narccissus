@@ -11,11 +11,11 @@ include_directories(external/glfw-3.3.8/include)
 add_subdirectory(external/glm)
 
 # Include Glad
-add_library(glad STATIC external/glad/src/glad.c src/grahics.cpp)
+add_library(glad STATIC external/glad/src/glad.c tests/test_graph.cpp)
 include_directories(external/glad/include)
 
 
-add_executable(narccissus include/Vec3.hpp include/Util.hpp include/Wave.hpp include/Face.hpp include/Mesh.hpp include/Path.hpp include/Nrcc.hpp src/grahics.cpp)
+add_executable(narccissus src/Vec3.hpp src/Util.hpp src/Wave.hpp src/Face.hpp src/Mesh.hpp src/Path.hpp src/Nrcc.hpp tests/test_field.cpp)
 
 # Link GLFW and Glad libraries
 target_link_libraries(narccissus glfw glad glm)

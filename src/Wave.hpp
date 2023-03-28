@@ -31,7 +31,7 @@ public:
             : origin(o), direct(d), power(P), delay(t), frequency(f), polar{shift(p, d).unit()} {}
 
     Wave(const Vec3 &o, const Vec3 &d)
-            : origin(o), direct(d), power(1), delay(), frequency(1e9), polar{shift(nrcc::linear<type>, d).unit()} {}
+            : origin(o), direct(d), power(1), delay(), frequency(1e9), polar{shift(nrcc::linear, d).unit()} {}
 
     type wavenumber() const {
         return 2 * nrcc::pi / wavelength();
@@ -54,10 +54,7 @@ public:
     }
 
     VecC electricField(const Vec3 &r) const {
-        cmpx x = amplitude(r) * phase(r) * polar.x;
-        cmpx y = amplitude(r) * phase(r) * polar.y;
-        cmpx z = amplitude(r) * phase(r) * polar.z;
-        return {x, y, z};
+        return polar * amplitude(r) * phase(r);
     }
 
     VecC magneticField(const Vec3 &r) const {

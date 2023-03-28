@@ -1,10 +1,10 @@
 #include <iomanip>
-#include "../include/Vec3.hpp"
-#include "../include/Face.hpp"
-#include "../include/Mesh.hpp"
-#include "../include/Wave.hpp"
-#include "../include/Path.hpp"
-#include "../include/Nrcc.hpp"
+#include "../src/Vec3.hpp"
+#include "../src/Face.hpp"
+#include "../src/Mesh.hpp"
+#include "../src/Wave.hpp"
+#include "../src/Path.hpp"
+#include "../src/Nrcc.hpp"
 
 int main() {
     // TESTING VEC3
@@ -66,17 +66,6 @@ int main() {
                 {5, 2, 1}};
     std::cout << "f02: " << f02 << "\n";
 
-    // TESTING MESH
-    using Mesh = Mesh<float>;
-
-    std::cout << "\nTESTING FILE READING\n";
-
-    Mesh m01{(std::ifstream) "../magnolia.obj"};
-
-    //for (int i = 0; i < m01.faces.size(); i++) {
-    //    std::cout << "tri " << i << ": " << m01.faces[i] << "\n";
-    //}
-
     // TESTING WAVE
     using Wave = Wave<float>;
 
@@ -106,17 +95,17 @@ int main() {
                 {5, -2, 0}};
     std::cout << "f03: " << f03 << "\n\n";
 
-    //std::cout << "int dist: " << rt01.intersectionDistance(w01, f03) << "\n";
-    //std::cout << "int vect: " << rt01.intersectionVector(w01, f03) << "\n";
-    //std::cout << "ref vect: " << rt01.reflectionVector(w01, f03) << "\n";
+    std::cout << "int dist: " << rt01.intersectionDistance(w01, f03) << "\n";
+    std::cout << "int vect: " << rt01.intersectionVector(w01, f03) << "\n";
+    std::cout << "ref vect: " << rt01.reflectionVector(w01, f03) << "\n";
 
     std::cout << "\nTESTING RAY SPHERE METHODS\n";
 
     Vec3 center = {5, 0, 1};
     float radius = 1;
 
-    //std::cout << "int dist: " << rt01.intersectionDistance(w01, center, radius) << "\n";
-    //std::cout << "int vect: " << rt01.intersectionVector(w01, center, radius) << "\n";
+    std::cout << "int dist: " << rt01.intersectionDistance(w01, center, radius) << "\n";
+    std::cout << "int vect: " << rt01.intersectionVector(w01, center, radius) << "\n";
 
     std::cout << "\nTESTING TRACE\n";
 
@@ -124,10 +113,14 @@ int main() {
              {0,   0,    5},
              {5.3, -4.7, 4}};
 
-    Mesh m02 = {{f03, f04}};
+    //Path p02 = rt01.trace(w01, m02);
+    //std::cout << "p02: " << p02;
 
-    Path p02 = rt01.trace(w01, m02);
-    std::cout << "p02: " << p02;
+    VecC mycomplex = {{1, 3},
+                      {3, 1},
+                      {4, 2}};
+    std::cout << mycomplex.real();
+
 
     return 0;
 }

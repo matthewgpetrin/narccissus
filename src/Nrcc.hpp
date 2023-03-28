@@ -51,11 +51,11 @@ public:
     }
 
     // CONSTRUCTOR
-    explicit Nrcc(const uint8_t &rs) : reflections(rs) {}
-
     Nrcc() : reflections(2) {}
 
-//private:
+    explicit Nrcc(const uint8_t &rs) : reflections(rs) {}
+
+private:
     // VECTOR - FACE METHODS
     type intersectionDistance(const Wave &wave, const Face &face) const {
         Vec3 p_vec = cross(wave.direct, face.bounds[1]);
@@ -140,8 +140,11 @@ public:
             }
         }
 
-        if (reflected && rs > 1) return trace(waves, faces, mesh, rs - 1);
-        else return {waves, faces};
+        if (reflected && rs > 1) {
+            std::cout << "reflected" << "\n";
+            return trace(waves, faces, mesh, rs - 1);
+
+        } else return {waves, faces};
     }
 };
 

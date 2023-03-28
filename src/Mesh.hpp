@@ -3,7 +3,6 @@
 #ifndef NARCCISSUS_MESH_HPP
 #define NARCCISSUS_MESH_HPP
 
-#include <vector>
 #include <fstream>
 #include <unordered_set>
 
@@ -13,14 +12,15 @@ template<typename type>
 class Mesh {
     using Vec3 = Vec3<type>;
     using Face = Face<type>;
+
 public:
     // VARIABLES
     const std::vector<Face> faces;
 
     // CONSTRUCTORS
-    Mesh(std::ifstream mesh) : faces(read(mesh)) {}
+    explicit Mesh(std::vector<Face> faces) : faces(faces) {}
 
-    Mesh(std::vector<Face> faces) : faces(faces) {}
+    explicit Mesh(std::ifstream mesh) : faces(read(mesh)) {}
 
 private:
     // METHODS
@@ -42,7 +42,7 @@ private:
 
         std::vector<Vec3> vertices;
         std::vector<std::string> materials;
-        std::vector<std::array<uint64_t , 4>> indices;
+        std::vector<std::array<uint64_t, 4>> indices;
 
         int normals = -1;
         char slash = '/';
@@ -55,14 +55,12 @@ private:
                 type x, y, z;
                 ss_vertex >> x >> y >> z;
                 vertices.push_back({x, y, z});
-            }
-            else if (line.substr(0, 7) == "usemtl ") {
+            } else if (line.substr(0, 7) == "usemtl ") {
                 std::istringstream ss_material(line.substr(7));
                 std::string material;
                 ss_material >> material;
                 materials.push_back(material);
-            }
-            else if (line.substr(0, 2) == "f ") {
+            } else if (line.substr(0, 2) == "f ") {
                 std::istringstream ss_indices(line.substr(2));
                 uint64_t i, j, k;
                 ss_indices >> i;
@@ -74,25 +72,24 @@ private:
                         ss_indices >> slash >> garbage >> j >> slash >> garbage >> k;
                         break;
                     case 2:
-                        ss_indices >> slash >> slash >> garbage >> j >> slash >> slash >>  garbage >> k;
+                        ss_indices >> slash >> slash >> garbage >> j >> slash >> slash >> garbage >> k;
                         break;
                     default:
-                        if(ss_indices.peek() != slash){
+                        if (ss_indices.peek() != slash) {
                             ss_indices >> j >> k;
                             normals = 0;
                         } else {
                             ss_indices >> slash;
-                            if (ss_indices.peek() != slash){
+                            if (ss_indices.peek() != slash) {
                                 ss_indices >> garbage >> j >> slash >> garbage >> k;
                                 normals = 1;
-                            } else{
+                            } else {
                                 ss_indices >> slash >> garbage >> j >> slash >> slash >> garbage >> k;
                                 normals = 2;
                             }
                         }
                 }
-
-                indices.push_back({i-1 , j-1, k-1, static_cast<uint64_t>(materials.size() - 1)});
+                indices.push_back({i - 1, j - 1, k - 1, static_cast<uint64_t>(materials.size() - 1)});
             }
         }
 

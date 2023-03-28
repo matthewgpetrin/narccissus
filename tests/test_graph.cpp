@@ -4,8 +4,9 @@
 #include <iostream>
 #include <vector>
 
-#include "../include/Mesh.hpp"
-#include "../include/Path.hpp"
+#include "../src/Mesh.hpp"
+#include "../src/Path.hpp"
+#include "../src/Nrcc.hpp"
 
 int main() {
     // Initialize GLFW
@@ -38,27 +39,77 @@ int main() {
     }
 
     // TESTING OBJ READING
+
     using Mesh = Mesh<float>;
 
     Mesh s01{(std::ifstream) "../maps/stevens.obj"};
 
     std::vector<float> vs;
 
-    float div = 500;
-
+    float div = 1;
+/*
     for (const auto &face: s01.faces) {
         for (int i = 0; i < 4; i++) {
             if (i == 3) {
                 vs.push_back(face.points[0].x / div);
-                vs.push_back(face.points[0].z / div );
-                vs.push_back(face.points[0].y / div);
+                vs.push_back(face.points[0].y / div );
+                vs.push_back(face.points[0].z / div);
             } else {
                 vs.push_back(face.points[i].x / div);
-                vs.push_back(face.points[i].z / div );
-                vs.push_back(face.points[i].y / div);
+                vs.push_back(face.points[i].y / div );
+                vs.push_back(face.points[i].z / div);
             }
         }
+    }*/
+    Mesh s02{{{{0, 0, 0}, {2, 0, 0}, {2, 2, 0}}}};
+
+    int numrays = 500;
+    std::vector<Vec3<float>> directs;
+    for (int i = 0; i < numrays; i++) {
+        directs.push_back(randomVector<float>().unit() * 3);
     }
+
+    std::vector<Wave<float>> waves;
+    for (int i = 0; i < numrays; i++) {
+        //waves.push_back({{1, 1, 1}, directs[i], 1, 2.4e9, 0, nrcc::linear});
+    }
+
+    Nrcc<float> rt01(3);
+    std::vector<Path<float>> paths;
+
+
+    for (const auto &wave: waves) {
+        //paths.push_back(rt01.trace(wave, s02));
+    }
+
+    std::cout << "POG";
+    std::vector<Vec3<float>> starts;
+    std::vector<Vec3<float>> ends;
+
+    std::vector<float> ws;
+    for (const auto &path: paths) {
+        for (const auto &w: path.waves) {
+            vs.push_back(w.origin.x / div);
+            vs.push_back(w.origin.y / div);
+            vs.push_back(w.origin.z / div);
+
+            vs.push_back(w.direct.x / div * 100 + (w.origin.x / div));
+            vs.push_back(w.direct.y / div * 100 + (w.origin.y / div));
+            vs.push_back(w.direct.z / div * 100 + (w.origin.z / div));
+            starts.push_back(w.origin);
+            ends.push_back(w.direct);
+        }
+    }
+    std::cout << "a =[";
+    for (int i = 0; i < starts.size(); i++) {
+        std::cout << starts[i] << "\n";
+    }
+    std::cout << "];\n\n";
+    std::cout << "b =[";
+    for (int i = 0; i < ends.size(); i++) {
+        std::cout << ends[i] << "\n";
+    }
+    std::cout << "];\n\n";
 
     // Define the vertices of the line
     std::vector<float> vertices = vs;
@@ -72,11 +123,12 @@ int main() {
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
 
     // Enable the vertex attribute array for the position and specify its layout
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *) 0);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
 
     // Unbind the VBO and VAO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -89,7 +141,6 @@ int main() {
 
         // Bind the VAO
         glBindVertexArray(vao);
-
 
         // Draw the lines
         glDrawArrays(GL_LINES, 0, vertices.size() / 3);

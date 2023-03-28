@@ -4,11 +4,10 @@
 #define NARCCISSUS_VEC3_HPP
 
 #include <array>
-#include <cmath>
-#include <iostream>
 #include <random>
 #include <chrono>
 #include <complex>
+#include <iostream>
 
 template<typename type>
 struct Vec3 {
@@ -38,6 +37,14 @@ struct Vec3 {
 
     Vec3 unit() const {
         return {x / norm(), y / norm(), z / norm()};
+    }
+
+    // TODO: CORRECT THIS FOR GENERICS
+    Vec3<float> real() const {
+        float a = x.real();
+        float b = y.real();
+        float c = z.real();
+        return {a, b, c};
     }
 
     // CONSTRUCTORS
@@ -123,11 +130,7 @@ Vec3<T> shift(const Vec3<T> &v, const Vec3<U> &w) {
     return cross(x, w) * -1;
 }
 
-template<typename T>
-Vec3<T> real(const Vec3<std::complex<T>> &v) {
-    return {v.x.real(), v.y.real(), v.z.real()};
-}
-
+// OTHER
 template<typename T>
 Vec3<T> randomVector() {
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -148,7 +151,7 @@ Vec3<T> randomVector() {
 // OSTREAM OVERLOAD
 template<typename T>
 std::ostream &operator<<(std::ostream &os, const Vec3<T> &v) {
-    os << "" << v.x << " " << v.y << " " << v.z << "";
+    os << v.x << ", " << v.y << ", " << v.z;
     return os;
 }
 
