@@ -30,6 +30,7 @@ namespace nrcc {
     Vec3<std::complex<T>> linear = {{0, 0},
                                     {0, 0},
                                     {1, 0}};
+    
 }
 
 #endif //NARCCISSUS_UTIL_HPP

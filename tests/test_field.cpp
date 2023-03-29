@@ -11,20 +11,22 @@ int main() {
     using Vec3 = Vec3<double>;
     using Wave = Wave<double>;
 
-    uint64_t nWaves = 500;
+    int angle = 18;
 
-    VecC polarization = {{0,  0},
-                         {0,  0},
-                         {-1, 0}};
+    VecC polarization = {{0, 0},
+                         {0, 0},
+                         {1, 0}};
 
     std::vector<Vec3> directs;
-    for (int i = 0; i < nWaves; i++) {
-        directs.push_back(randomVector<double>().unit());
+    for (int n = 0; n < 360; n = n + angle) {
+        for (int m = 0; m < 360; m = m + angle) {
+            directs.push_back({n * nrcc::pi / 180, m * nrcc::pi / 180});
+        }
     }
 
     std::vector<Wave> waves;
-    for (int i = 0; i < nWaves; i++) {
-        waves.push_back({{0, 0, 0}, directs[i], 1, 2.4e9, 0, polarization});
+    for (const auto &direct: directs) {
+        waves.push_back({{0, 0, 0}, direct, 1, 2.4e9, 0, polarization});
     }
 
     std::ofstream origins("../data/fields_o.txt", std::ofstream::out);
@@ -32,8 +34,8 @@ int main() {
         std::cerr << "Could not open fields_o.txt" << "\n";
         return 1;
     }
-    for (int i = 0; i < nWaves; i++) {
-        origins << directs[i].unit() << "\n";
+    for (const auto &direct: directs) {
+        origins << direct.unit() << "\n";
     }
     origins.close();
 
@@ -42,7 +44,7 @@ int main() {
         std::cerr << "Could not open fields_e.txt" << "\n";
         return 2;
     }
-    for (int i = 0; i < nWaves; i++) {
+    for (int i = 0; i < waves.size(); i++) {
         electrics << waves[i].electricField(directs[i]).real().unit() / 2 << "\n";
     }
     electrics.close();
@@ -52,7 +54,7 @@ int main() {
         std::cerr << "Could not open fields_m.txt" << "\n";
         return 3;
     }
-    for (int i = 0; i < nWaves; i++) {
+    for (int i = 0; i < waves.size(); i++) {
         magnets << waves[i].magneticField(directs[i]).real().unit() / 2 << "\n";
     }
     magnets.close();

@@ -33,9 +33,6 @@ public:
     Wave(const Vec3 &o, const Vec3 &d)
             : origin(o), direct(d), power(1), delay(), frequency(1e9), polar{shift(nrcc::linear<type>, d).unit()} {}
 
-    Wave(const Wave &w) : origin(w.origin), direct(w.direct), power(w.power), delay(w.delay), frequency(w.frequency),
-                          polar(w.polar) {}
-
     type wavenumber() const {
         return 2 * nrcc::pi / wavelength();
     }
@@ -56,13 +53,14 @@ public:
         return std::exp<type>(nrcc::j * dot(wavevector(), r) + nrcc::j * delay);
     }
 
+    // TODO: CHECK IF THIS SHOULD BE NEGATIVE OR NOT
     VecC electricField(const Vec3 &r) const {
-        return polar * amplitude(r) * phase(r);
+        return polar * amplitude(r) * phase(r) * -1;
     }
 
     VecC magneticField(const Vec3 &r) const {
         //return cross(electricField(r), direct) / (377);
-        return cross(electricField(r), direct);
+        return cross(electricField(r), direct) * -1;
     }
 
     // Polarization is represented as vector of complex numbers. The real and imaginary components represent
