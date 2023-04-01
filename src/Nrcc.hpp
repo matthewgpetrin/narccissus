@@ -3,15 +3,14 @@
 #ifndef NARCCISSUS_NRCC_HPP
 #define NARCCISSUS_NRCC_HPP
 
-#include "Path.hpp"
 #include "Mesh.hpp"
-
+/*
 template<typename type>
 class Nrcc {
     using Vec3 = Vec3<type>;
     using Face = Face<type>;
     using Wave = Wave<type>;
-    using Path = Path<type>;
+    //using Path = Path<type>;
     using Mesh = Mesh<type>;
 
 private:
@@ -76,7 +75,7 @@ public:
 
         return dot(face.bounds[1], q_vec) * (1 / det);
     }
-    
+
     Vec3 intersectionVector(const Wave &wave, const Face &face) const {
         return wave.direct * intersectionDistance(wave, face) + wave.origin;
     }
@@ -86,37 +85,10 @@ public:
     }
 
     // VECTOR - SPHERE METHODS
-    type intersectionDistance(const Wave &wave, const Vec3 &center, const type &radius) const {
-        Vec3 l = wave.origin - center;
 
-        type a = dot(wave.direct, wave.direct);
-        type b = 2 * dot(wave.direct, l);
-        type c = dot(l, l) - radius * radius;
-
-        type d = b * b - 4 * a * c;
-
-        type t, u;
-
-        if (d < 0) return -1;
-        else if (d == 0) return -0.5 * b / a;
-        else {
-            type q = (b > 0) ? -0.5 * (b + std::sqrt(d)) : -0.5 * (b - std::sqrt(d));
-
-            t = q / a;
-            u = c / q;
-
-            if (t < u && t > 0) return t;
-            else if (u > 0) return u;
-            else return -1;
-        }
-    }
-
-    Vec3 intersectionVector(const Wave &wave, const Vec3 &center, const type &radius) const {
-        return wave.direct * intersectionDistance(wave, center, radius) + wave.origin;
-    }
 
     // RECURSIVE TRACE METHOD
-    Path trace(std::vector<Wave> &waves, std::vector<Face> &faces, const Mesh &mesh, const uint8_t &rs) {
+        Path trace(std::vector<Wave> &waves, std::vector<Face> &faces, const Mesh &mesh, const uint8_t &rs) {
         Wave wave = waves.back();
         bool reflected = false;
 
@@ -143,5 +115,5 @@ public:
         else return {waves, faces};
     }
 };
-
+*/
 #endif //NARCCISSUS_NRCC_HPP

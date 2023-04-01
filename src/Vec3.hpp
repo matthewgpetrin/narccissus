@@ -35,6 +35,10 @@ struct Vec3 {
         return std::sqrt((x * x) + (y * y) + (z * z));
     }
 
+    type normC() const {
+        return std::sqrt(std::norm(x) + std::norm(y) + std::norm(z));
+    }
+
     Vec3 unit() const {
         return {x / norm(), y / norm(), z / norm()};
     }
@@ -47,7 +51,16 @@ struct Vec3 {
         return {a, b, c};
     }
 
+    Vec3<float> imag() const {
+        float a = x.imag();
+        float b = y.imag();
+        float c = z.imag();
+        return {a, b, c};
+    }
+
     // CONSTRUCTORS
+    Vec3() : v{-7, -7, -7} {}
+
     Vec3(const Vec3 &v) : v{v.x, v.y, v.z} {}
 
     Vec3(const type &x, const type &y, const type &z) : v{x, y, z} {}
@@ -95,6 +108,11 @@ std::array<T, 3> cartesian(const T &el, const T &az) {
 }
 
 // VECTOR MATHEMATICS
+template<typename T>
+T angle(const Vec3<T> &v, const Vec3<T> &w) {
+    return std::acos(dot(v, w));
+}
+
 template<typename T>
 T distance(const Vec3<T> &v, const Vec3<T> &w) {
     T a = v.x - w.x;

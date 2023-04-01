@@ -35,7 +35,7 @@ int main() {
         return 1;
     }
     for (const auto &direct: directs) {
-        origins << direct.unit() << "\n";
+        origins << direct.unit() * 2 << "\n";
     }
     origins.close();
 
@@ -45,7 +45,7 @@ int main() {
         return 2;
     }
     for (int i = 0; i < waves.size(); i++) {
-        electrics << waves[i].electricField(directs[i]).real().unit() / 2 << "\n";
+        electrics << waves[i].electricField(directs[i] * 2).real().unit() / 2 << "\n";
     }
     electrics.close();
 
@@ -55,7 +55,7 @@ int main() {
         return 3;
     }
     for (int i = 0; i < waves.size(); i++) {
-        magnets << waves[i].magneticField(directs[i]).real().unit() / 2 << "\n";
+        magnets << waves[i].magneticField(directs[i] * 2).real().unit() / 2 << "\n";
     }
     magnets.close();
 
