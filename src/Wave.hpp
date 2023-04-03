@@ -105,7 +105,7 @@ public:
     // FIELD VECTOR METHODS
     VecC electricField(const type &r) {
         return polarization(r) * std::exp(phase(r) * nrcc::j) * amplitude(r);
-    }                                                                       // TODO: CHECK IF THIS SHOULD BE NEGATIVE OR NOT
+    }                                                                             // TODO: CHECK IF THIS SHOULD BE NEGATIVE OR NOT
 
     VecC magneticField(const type &r) {
         //return cross(electricField(r), wavevector(r)) / 377;
@@ -122,11 +122,20 @@ public:
         cmpx np = genesis.face->refractiveIndex(initial.frequency);
 
         cmpx i = angle(genesis.face->normal(), genesis.wave->direct);
-        cmpx t = std::asin(std::sin(i) * ns / np);
+        //std::cout << i;
+        cmpx t = std::asin(ns / np * std::sin(i));
+        //std::cout << t;
 
-        cmpx Rs = (np * std::cos(i) - ns * std::cos(t)) /
-                  (np * std::cos(i) + ns * std::cos(t));                        // TODO: FIX THIS IT SHOULD NOT BE 1
-        cmpx Rp = (ns * std::cos(i) - np * std::cos(t)) / (ns * std::cos(i) + np * std::cos(t));
+        //cmpx Rs = std::cos(i) - std::sqrt((np - pow(std::sin(i), 2)) / pow(np, 2)) /
+        //                        (std::cos(i) + std::sqrt((np - pow(std::sin(i), 2)) / pow(np, 2)));
+        cmpx Rs = (ns * std::cos(i) - np * std::sqrt(cmpx(1.0) - pow((ns / np) * std::sin(i), 2))) /
+                  (ns * std::cos(i) + np * std::sqrt(cmpx(1.0) - pow((ns / np) * std::sin(i), 2)));
+        std::cout << "\na: " << (np * std::cos(i) - ns * std::cos(t)) << "\n";
+        std::cout << "b: " << (np * std::cos(i) + ns * std::cos(t)) << "\n";
+        std::cout << "c: " << Rs << "\n";
+        //cmpx Rp = (ns * std::cos(i) - np * std::cos(t)) / (ns * std::cos(i) + np * std::cos(t));
+        cmpx Rp = std::cos(i) - std::sqrt(np - pow(std::sin(i), 2)) /
+                                (std::cos(i) + std::sqrt(np - pow(std::sin(i), 2)));
 
         VecC Ei = genesis.wave->electricField(genesis.distance);
 
@@ -138,11 +147,13 @@ public:
         VecC Er = Es * Rs + Ep * Rp;
 
         // INITIALIZE INITIAL VARIABLES
-        initial.amplitude = Er.normC().real();
+        initial.amplitude = Er.real().norm();
 
         initial.phase = std::atan2(dot(Er.imag(), Er.real()), Er.real().norm());
 
         initial.polarization = shift(Er.unit(), direct);
+
+        std::cout << initial.amplitude;
     }
 
     // PARENT WAVE CONSTRUCTOR
@@ -154,7 +165,7 @@ public:
          const VecC &p) :
             origin(o),
             direct(d),
-            initial{f, A, t, p},
+            initial{f, A, t, shift(p, d)},
             genesis{nullptr, nullptr, 0, nrcc::emission} {}
 
     // CHILD WAVE CONSTRUCTOR

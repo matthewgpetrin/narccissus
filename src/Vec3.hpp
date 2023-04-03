@@ -35,7 +35,7 @@ struct Vec3 {
         return std::sqrt((x * x) + (y * y) + (z * z));
     }
 
-    type normC() const {
+    float normC() const {
         return std::sqrt(std::norm(x) + std::norm(y) + std::norm(z));
     }
 
