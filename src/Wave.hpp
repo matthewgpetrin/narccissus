@@ -62,10 +62,10 @@ public:
         return initial.amplitude * std::exp(-a * r);
     }
 
-    type phase(const type &r) {
+    cmpx phase(const type &r) {
         if (initial.amplitude == -7.0) initializeEm();
 
-        return initial.phase + wavenumber(r) * r;
+        return std::exp(initial.phase + nrcc::j * wavenumber(r) * r);
     }
 
     VecC polarization(const type &r) {
@@ -104,7 +104,7 @@ public:
 
     // FIELD VECTOR METHODS
     VecC electricField(const type &r) {
-        return polarization(r) * std::exp(phase(r) * nrcc::j) * amplitude(r);
+        return polarization(r) * phase(r) * amplitude(r);
     }                                                                             // TODO: CHECK IF THIS SHOULD BE NEGATIVE OR NOT
 
     VecC magneticField(const type &r) {
@@ -118,31 +118,28 @@ public:
         initial.frequency = genesis.wave->frequency(genesis.distance);
 
         // CALCULATE EH FIELD (FRESNEL EQUATIONS)
-        cmpx ns = 1; // Refractive index assuming air
-        cmpx np = genesis.face->refractiveIndex(initial.frequency);
-
-        cmpx i = angle(genesis.face->normal(), genesis.wave->direct);
-        //std::cout << i;
-        cmpx t = std::asin(ns / np * std::sin(i));
-        //std::cout << t;
-
-        //cmpx Rs = std::cos(i) - std::sqrt((np - pow(std::sin(i), 2)) / pow(np, 2)) /
-        //                        (std::cos(i) + std::sqrt((np - pow(std::sin(i), 2)) / pow(np, 2)));
-        cmpx Rs = (ns * std::cos(i) - np * std::sqrt(cmpx(1.0) - pow((ns / np) * std::sin(i), 2))) /
-                  (ns * std::cos(i) + np * std::sqrt(cmpx(1.0) - pow((ns / np) * std::sin(i), 2)));
-        std::cout << "\na: " << (np * std::cos(i) - ns * std::cos(t)) << "\n";
-        std::cout << "b: " << (np * std::cos(i) + ns * std::cos(t)) << "\n";
-        std::cout << "c: " << Rs << "\n";
-        //cmpx Rp = (ns * std::cos(i) - np * std::cos(t)) / (ns * std::cos(i) + np * std::cos(t));
-        cmpx Rp = std::cos(i) - std::sqrt(np - pow(std::sin(i), 2)) /
-                                (std::cos(i) + std::sqrt(np - pow(std::sin(i), 2)));
+        Vec3 n = genesis.face->normal();
+        Vec3 t = genesis.face->bounds[0];
+        VecC nc = {{n.x, 0},
+                   {n.y, 0},
+                   {n.z, 0}};
 
         VecC Ei = genesis.wave->electricField(genesis.distance);
 
-        cmpx phi = std::acos(dot(Ei.real(), genesis.face->normal()) / Ei.normC());
+        cmpx ni = {1, 0};
+        cmpx nt = {genesis.face->refractiveIndex(initial.frequency).real(), 0};
 
-        VecC Es = Ei / ns;
-        VecC Ep = {-std::cos(phi) * Ei.y / np, std::cos(phi) * Ei.x / np, Ei.z / np};
+        cmpx cos_i = dot(Ei, n);
+        cmpx sin_i = std::sqrt(cmpx(1.0) - cos_i * cos_i);
+
+        cmpx sin_t = ni / nt * sin_i;
+        cmpx cos_t = std::sqrt(cmpx(1.0) - sin_t * sin_t);
+
+        cmpx Rp = std::pow((ni * cos_i - nt * cos_t) / (ni * cos_i + nt * cos_t), 2);
+        cmpx Rs = std::pow((nt * cos_i - ni * cos_t) / (nt * cos_i + ni * cos_t), 2);
+
+        VecC Es = cross(Ei, t);
+        VecC Ep = Ei - Es * nc;
 
         VecC Er = Es * Rs + Ep * Rp;
 
@@ -152,8 +149,6 @@ public:
         initial.phase = std::atan2(dot(Er.imag(), Er.real()), Er.real().norm());
 
         initial.polarization = shift(Er.unit(), direct);
-
-        std::cout << initial.amplitude;
     }
 
     // PARENT WAVE CONSTRUCTOR

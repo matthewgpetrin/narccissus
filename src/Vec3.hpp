@@ -108,8 +108,8 @@ std::array<T, 3> cartesian(const T &el, const T &az) {
 }
 
 // VECTOR MATHEMATICS
-template<typename T>
-T angle(const Vec3<T> &v, const Vec3<T> &w) {
+template<typename T, typename U>
+T angle(const Vec3<T> &v, const Vec3<U> &w) {
     return std::acos(dot(v, w));
 }
 
@@ -129,8 +129,13 @@ Vec3<T> exp(const Vec3<T> &v) {
     return 1 + v + v2 / 2 + v3 / 6;
 }
 
-template<typename T>
-T dot(const Vec3<T> &v, const Vec3<T> &w) {
+//template<typename T, typename U>
+//T dot(const Vec3<T> &v, const Vec3<U> &w) {
+//    return std::conj(v.x) * std::conj(w.x) + std::conj(v.y) * std::conj(w.y) + std::conj(v.z) * std::conj(w.z);
+//}
+
+template<typename T, typename U>
+T dot(const Vec3<T> &v, const Vec3<U> &w) {
     return v.x * w.x + v.y * w.y + v.z * w.z;
 }
 

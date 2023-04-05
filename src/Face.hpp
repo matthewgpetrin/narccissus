@@ -34,14 +34,15 @@ public:
 
 
     std::complex<type> refractiveIndex(const type &frequency) {
-        type r = nrcc::permittivity[material][0] * std::pow(frequency, nrcc::permittivity[material][1]);
+        type n = nrcc::permittivity[material][0] * std::pow(frequency, nrcc::permittivity[material][1]);
 
         type c = nrcc::conductivity[material][0] * std::pow(frequency, nrcc::conductivity[material][1]);
 
-        type i = c / (2 * nrcc::pi * nrcc::electric_constant * frequency);
+        type k = 17.98 * c / frequency;
 
-        return {r, i};
+        return {n, k};
     }
+    // https://www.itu.int/dms_pubrec/itu-r/rec/p/R-REC-P.2040-1-201507-S!!PDF-E.pdf
 };
 
 // OSTREAM OVERRIDE

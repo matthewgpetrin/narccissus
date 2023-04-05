@@ -15,7 +15,7 @@ namespace nrcc {
 
     double infinity = std::numeric_limits<double>::infinity();
 
-    std::complex<float> j = std::complex<float>(0, 1);
+    std::complex<double> j = std::complex<double>(0, 1);
 
     double golden_angle = pi * (3 - sqrt(5));
 
