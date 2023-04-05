@@ -1,5 +1,6 @@
 // Copyright(c) 2023, Matthew Petrin, All rights reserved.
 
+// USES OUTDATED WAVE MODEL
 // Test designed to visualize dipole far fields calculated by electricField and magneticField.
 // Output files can be read by matlab functions in /tools/
 

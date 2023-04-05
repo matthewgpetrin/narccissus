@@ -35,27 +35,31 @@ struct Vec3 {
         return std::sqrt((x * x) + (y * y) + (z * z));
     }
 
-    float normC() const {
-        return std::sqrt(std::norm(x) + std::norm(y) + std::norm(z));
-    }
-
     Vec3 unit() const {
         return {x / norm(), y / norm(), z / norm()};
     }
 
-    // TODO: CORRECT THIS FOR GENERICS
-    Vec3<float> real() const {
-        float a = x.real();
-        float b = y.real();
-        float c = z.real();
-        return {a, b, c};
+    auto real() const {
+        using U = typename std::remove_reference<decltype(x)>::type::value_type;
+        using V = typename std::remove_reference<decltype(x)>::type;
+        return Vec3<typename std::enable_if<std::is_same<V, std::complex<U>>::value, U>::type>
+                (static_cast<U>(std::real(x)), static_cast<U>(std::real(y)), static_cast<U>(std::real(z)));
     }
 
-    Vec3<float> imag() const {
-        float a = x.imag();
-        float b = y.imag();
-        float c = z.imag();
-        return {a, b, c};
+    auto imag() const {
+        using U = typename std::remove_reference<decltype(x)>::type::value_type;
+        using V = typename std::remove_reference<decltype(x)>::type;
+        return Vec3<typename std::enable_if<std::is_same<V, std::complex<U>>::value, U>::type>
+                (static_cast<U>(std::imag(x)), static_cast<U>(std::imag(y)), static_cast<U>(std::imag(z)));
+    }
+
+    auto cmpx() const {
+        using cmpx = std::complex<type>;
+        cmpx a = {x, 0};
+        cmpx b = {y, 0};
+        cmpx c = {z, 0};
+        Vec3<cmpx> u = {a, b, c};
+        return u;
     }
 
     // CONSTRUCTORS
@@ -108,8 +112,8 @@ std::array<T, 3> cartesian(const T &el, const T &az) {
 }
 
 // VECTOR MATHEMATICS
-template<typename T, typename U>
-T angle(const Vec3<T> &v, const Vec3<U> &w) {
+template<typename T>
+T angle(const Vec3<T> &v, const Vec3<T> &w) {
     return std::acos(dot(v, w));
 }
 
@@ -128,11 +132,6 @@ Vec3<T> exp(const Vec3<T> &v) {
     Vec3<T> v3 = v * v * v;
     return 1 + v + v2 / 2 + v3 / 6;
 }
-
-//template<typename T, typename U>
-//T dot(const Vec3<T> &v, const Vec3<U> &w) {
-//    return std::conj(v.x) * std::conj(w.x) + std::conj(v.y) * std::conj(w.y) + std::conj(v.z) * std::conj(w.z);
-//}
 
 template<typename T, typename U>
 T dot(const Vec3<T> &v, const Vec3<U> &w) {

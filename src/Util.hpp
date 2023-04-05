@@ -39,6 +39,11 @@ namespace nrcc {
         Vec3<std::complex<T>> null = {{-7, -7},
                                       {-7, -7},
                                       {-7, -7}};
+
+        template<typename T>
+        Vec3<std::complex<T>> circular = {{0, 0},
+                                          {1, 0},
+                                          {0, 1}};
     }
     enum Interaction {
         emission,

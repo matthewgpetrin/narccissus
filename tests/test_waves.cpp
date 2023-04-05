@@ -1,5 +1,6 @@
 // Copyright(c) 2023, Matthew Petrin, All rights reserved.
 
+// USES OUTDATED WAVE MODEL
 // Test designed to view EH field changes with time. Adjusting polar will result in varied waveforms.
 // Output files can be read by matlab functions in /tools/
 

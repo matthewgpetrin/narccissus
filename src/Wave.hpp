@@ -65,7 +65,7 @@ public:
     cmpx phase(const type &r) {
         if (initial.amplitude == -7.0) initializeEm();
 
-        return std::exp(initial.phase + nrcc::j * wavenumber(r) * r);
+        return wavenumber(r) * r + initial.phase;
     }
 
     VecC polarization(const type &r) {
@@ -103,10 +103,12 @@ public:
     }
 
     // FIELD VECTOR METHODS
+    // TODO: CHECK IF THIS SHOULD BE NEGATIVE OR NOT
     VecC electricField(const type &r) {
-        return polarization(r) * phase(r) * amplitude(r);
-    }                                                                             // TODO: CHECK IF THIS SHOULD BE NEGATIVE OR NOT
+        return polarization(r) * std::exp(phase(r) * nrcc::j) * amplitude(r);
+    }
 
+    // TODO: CHECK MAGNITUDE AND SIGN
     VecC magneticField(const type &r) {
         //return cross(electricField(r), wavevector(r)) / 377;
         return cross(electricField(r), direct); // Inaccurate used for visualization
@@ -119,10 +121,7 @@ public:
 
         // CALCULATE EH FIELD (FRESNEL EQUATIONS)
         Vec3 n = genesis.face->normal();
-        Vec3 t = genesis.face->bounds[0];
-        VecC nc = {{n.x, 0},
-                   {n.y, 0},
-                   {n.z, 0}};
+        Vec3 t = genesis.face->bounds[0].unit();
 
         VecC Ei = genesis.wave->electricField(genesis.distance);
 
@@ -139,7 +138,7 @@ public:
         cmpx Rs = std::pow((nt * cos_i - ni * cos_t) / (nt * cos_i + ni * cos_t), 2);
 
         VecC Es = cross(Ei, t);
-        VecC Ep = Ei - Es * nc;
+        VecC Ep = Ei - n.cmpx() * dot(Es, n);
 
         VecC Er = Es * Rs + Ep * Rp;
 
@@ -148,7 +147,7 @@ public:
 
         initial.phase = std::atan2(dot(Er.imag(), Er.real()), Er.real().norm());
 
-        initial.polarization = shift(Er.unit(), direct);
+        initial.polarization = shift(Er, direct).unit();
     }
 
     // PARENT WAVE CONSTRUCTOR
