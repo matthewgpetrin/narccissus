@@ -37,7 +37,7 @@ public:
         Wave *wave;
         Face *face;
         const type distance;
-        const nrcc::Interaction interaction;
+        const nrcc::Interactions interaction;
     } genesis;
 
 public:
@@ -151,23 +151,14 @@ public:
     }
 
     // PARENT WAVE CONSTRUCTOR
-    Wave(const Vec3 &o,
-         const Vec3 &d,
-         const type &A,
-         const type &f,
-         const type &t,
-         const VecC &p) :
+    Wave(const Vec3 &o, const Vec3 &d, const type &A, const type &f, const type &t, const VecC &p) :
             origin(o),
             direct(d),
             initial{f, A, t, shift(p, d)},
             genesis{nullptr, nullptr, 0, nrcc::emission} {}
 
     // CHILD WAVE CONSTRUCTOR
-    Wave(const Vec3 &o,
-         const Vec3 &d,
-         Wave *w,
-         Face *f,
-         const nrcc::Interaction i) :
+    Wave(const Vec3 &o, const Vec3 &d, Wave *w, Face *f, const nrcc::Interactions i) :
             origin(o),
             direct(d),
             genesis{w, f, distance(w->origin, o), i},
