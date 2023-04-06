@@ -15,7 +15,7 @@ set(CMAKE_CXX_STANDARD 23)
 #include_directories(external/glad/include)
 
 
-add_executable(narccissus src/Vec3.hpp src/Util.hpp src/Wave.hpp src/Face.hpp src/Mesh.hpp tests/donut.cpp src/Pole.hpp)
+add_executable(narccissus src/Vec3.hpp src/Util.hpp src/Wave.hpp src/Face.hpp src/Mesh.hpp tests/test_donut.cpp src/Pole.hpp)
 
 # Link GLFW and Glad libraries
 #target_link_libraries(narccissus glfw glad glm)
