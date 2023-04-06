@@ -12,7 +12,7 @@ int main() {
     using Vec3 = Vec3<double>;
     using Wave = Wave<double>;
 
-    Wave parent = {{0, 0, 0}, {1, 0, 0}, 5, 1e9, 0, nrcc::polarization::circular<double>};
+    Wave parent = {{0, 0, 0}, {1, 0, 0}, 5, 1e9, 0, nrcc::polarization::linear};
 
     Face<double> face = {{5, -1, -1},
                          {6, -1, 2},

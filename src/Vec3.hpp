@@ -114,7 +114,7 @@ std::array<T, 3> cartesian(const T &el, const T &az) {
 // VECTOR MATHEMATICS
 template<typename T>
 T angle(const Vec3<T> &v, const Vec3<T> &w) {
-    return std::acos(dot(v, w));
+    return std::acos(dot(v.unit(), w.unit()));
 }
 
 template<typename T>

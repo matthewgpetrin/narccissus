@@ -36,17 +36,22 @@ namespace nrcc {
                                           {1, 0},
                                           {0, 1}};
 
-        template<typename T>
+        /*template<typename T>
         Vec3<std::complex<T>> linear = {{0, 0},
                                         {0, 0},
-                                        {1, 0}};
+                                        {1, 0}};*/
+
+
+        Vec3<std::complex<double>> linear = {{0, 0},
+                                             {0, 0},
+                                             {1, 0}};
     }
 
     enum Interactions {
         emission,
         reflection,
+        refraction,
         diffraction,
-        transmission,
     };
 
     enum Materials {
@@ -86,6 +91,75 @@ namespace nrcc {
             {nrcc::Materials::ground,   {0.0350,  1.6300}},
             {nrcc::Materials::swamp,    {0.1500,  1.3000}},
     };
+
+    std::vector<Vec3<double>> icosphere(int subdivs) {
+        const double X = 0.525731112119133606;
+        const double Z = 0.850650808352039932;
+
+        std::vector<Vec3<double>> vertices{
+                {-X, 0,  Z},
+                {X,  0,  Z},
+                {-X, 0,  -Z},
+                {X,  0,  -Z},
+                {0,  Z,  X},
+                {0,  Z,  -X},
+                {0,  -Z, X},
+                {0,  -Z, -X},
+                {Z,  X,  0},
+                {-Z, X,  0},
+                {Z,  -X, 0},
+                {-Z, -X, 0}
+        };
+
+        std::vector<Vec3<int>> faces{
+                {0,  4,  1},
+                {0,  9,  4},
+                {9,  5,  4},
+                {4,  5,  8},
+                {4,  8,  1},
+                {8,  10, 1},
+                {8,  3,  10},
+                {5,  3,  8},
+                {5,  2,  3},
+                {2,  7,  3},
+                {7,  10, 3},
+                {7,  6,  10},
+                {7,  11, 6},
+                {11, 0,  6},
+                {0,  1,  6},
+                {6,  1,  10},
+                {9,  0,  11},
+                {9,  11, 2},
+                {9,  2,  5},
+                {7,  2,  11}
+        };
+
+        for (int i = 0; i < subdivs; ++i) {
+            std::vector<Vec3<int>> fs;
+            std::vector<Vec3<double>> vs = vertices;
+
+            for (const auto &face: faces) {
+                int v1 = face.x;
+                int v2 = face.y;
+                int v3 = face.z;
+                uint64_t v12 = vs.size();
+                uint64_t v23 = v12 + 1;
+                uint64_t v31 = v12 + 2;
+
+                vs.push_back((vs[v1] * 0.5 + vs[v2] * 0.5).unit());
+                vs.push_back((vs[v2] * 0.5 + vs[v3] * 0.5).unit());
+                vs.push_back((vs[v3] * 0.5 + vs[v1] * 0.5).unit());
+
+                fs.emplace_back(v1, v12, v31);
+                fs.emplace_back(v2, v23, v12);
+                fs.emplace_back(v3, v31, v23);
+                fs.emplace_back(v12, v23, v31);
+            }
+            faces = fs;
+            vertices = vs;
+        }
+        return vertices;
+    }
 }
 
 #endif //NARCCISSUS_UTIL_HPP
