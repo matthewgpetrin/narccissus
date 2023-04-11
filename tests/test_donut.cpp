@@ -8,8 +8,8 @@ int main() {
     using Pole = Pole<double>;
     using Wave = Wave<double>;
 
-    Pole pole = {{0, 0, 0}, {0, 0, 1}, 2.4e9};
-    std::vector<Wave> waves = pole.transmit(10000, 4, 5);
+    Pole pole = {{0, 0, 0}, {0, 0, 1}, 2.4e9, 1};
+    std::vector<Wave> waves = pole.transmit(10000, 0, 2);
 
     std::ofstream donut_points("../data/donut_points.txt", std::ofstream::out);
     for (const auto &wave: waves) {
@@ -27,7 +27,8 @@ int main() {
     for (const auto &wave: waves) {
         power_check += wave.initial.amplitude;
     }
-    std::cout << "power: " << power_check;
+    std::cout << "power: " << power_check << "\n";
+    std::cout << "count: " << waves.size();
 
     return 0;
 }

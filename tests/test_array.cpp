@@ -21,12 +21,6 @@ int main() {
 
     std::vector<double> phases = {1.2022, 2.9025, 2.9025, 1.2022, -1.2022, -2.9025, -2.9025, -1.2022};
 
-    /*
-    std::vector<Pole> poles;
-    for (int i = 0; i < tx_count; i++) {
-        poles.push_back({{0, tx_wavelength * i - (int(tx_count / 2) * tx_wavelength), 0}, {0, 0, 1}, 2.4e9, 1});
-    }*/
-
     std::vector<Pole> poles;
     for (int i = 0; i < tx_count; i++) {
         Vec3 ang = {0, nrcc::pi / 4 * i + 0.3926991};
@@ -37,8 +31,7 @@ int main() {
     std::vector<Wave> waves;
     for (int i = 0; i < poles.size(); i++) {
         double phase = phases[i];
-        std::vector<Wave> tx = poles[i].transmit(tx_power, phase, 0, tx_waves);
-
+        std::vector<Wave> tx = poles[i].transmit(tx_power, phase, 2, tx_waves);
         for (auto &wave: tx) waves.push_back(wave);
     }
 

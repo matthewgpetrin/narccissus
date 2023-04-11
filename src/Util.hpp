@@ -160,6 +160,36 @@ namespace nrcc {
         }
         return vertices;
     }
+
+    template<typename T>
+    type intersectionDistance(const Vec3<T> &origin, const Vec3<T> &direct, const Vec3<T> &center, const T &radius) {
+        Vec3 length = origin - center;
+
+        T a = dot(direct, direct);
+        T b = 2 * dot(direct, length);
+        T c = dot(length, length) - radius * radius;
+
+        T d = b * b - 4 * a * c;
+
+        T t;
+        T u;
+
+        if (d < 0) return -1;
+
+        else if (d == 0) return -0.5 * b / a;
+
+        else {
+            T q = (b > 0) ? -0.5 * (b + std::sqrt(d)) : -0.5 * (b - std::sqrt(d));
+            t = q / a;
+            u = c / q;
+
+            if (t < u && t > 0) return t;
+
+            else if (u > 0) return u;
+
+            else return -1;
+        }
+    }
 }
 
 #endif //NARCCISSUS_UTIL_HPP

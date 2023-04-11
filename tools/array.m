@@ -8,7 +8,7 @@ fields(isnan(fields)) = 0;
 m = max(powers);
 powers = powers * (1 / m);
 
-points = points .* powers;
+points = points .* (powers);
 
 figure
 cmap = jet(256); 
