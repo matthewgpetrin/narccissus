@@ -11,7 +11,6 @@
 
 template<typename type>
 struct Vec3 {
-
     // VARIABLES
     union {
         struct {
@@ -62,12 +61,22 @@ struct Vec3 {
         return u;
     }
 
+    auto conj() const {
+        type a = {x.real(), -x.imag()};
+        type b = {y.real(), -y.imag()};
+        type c = {z.real(), -z.imag()};
+        Vec3 u = {a, b, c};
+        return u;
+    }
+
     // CONSTRUCTORS
     Vec3() : v{-7, -7, -7} {}
 
     Vec3(const Vec3 &v) : v{v.x, v.y, v.z} {}
 
     Vec3(const type &x, const type &y, const type &z) : v{x, y, z} {}
+
+    Vec3(const std::array<type, 3> &v) : x(v[0]), y(v[1]), z(z[2]) {}
 
     Vec3(const type &el, const type &az) : v{std::cos(el) * std::cos(az), std::cos(el) * std::sin(az), std::sin(el)} {}
 
@@ -99,16 +108,16 @@ struct Vec3 {
 
 // COORDINATE CONVERSIONS
 template<typename T>
-std::array<T, 2> spherical(const Vec3<T> &v) {
-    return {std::asin(v.z / v.norm()), std::atan2(v.y, v.x)};
-}
-
-template<typename T>
-std::array<T, 3> cartesian(const T &el, const T &az) {
+std::array<T, 3> euclidean(const T &el, const T &az) {
     T x = std::cos(el) * std::cos(az);
     T y = std::cos(el) * std::sin(az);
     T z = std::sin(el);
     return {x, y, z};
+}
+
+template<typename T>
+std::array<T, 2> spherical(const Vec3<T> &v) {
+    return {std::asin(v.z / v.norm()), std::atan2(v.y, v.x)};
 }
 
 // VECTOR MATHEMATICS
@@ -118,21 +127,14 @@ T angle(const Vec3<T> &v, const Vec3<T> &w) {
 }
 
 template<typename T>
-T distance(const Vec3<T> &v, const Vec3<T> &w) {
+T range(const Vec3<T> &v, const Vec3<T> &w) {
     T a = v.x - w.x;
     T b = v.y - w.y;
     T c = v.z - w.z;
     return std::sqrt((a * a) + (b * b) + (c * c));
 }
 
-// COMPLEX VECTOR MATHEMATICS
-template<typename T>
-Vec3<T> exp(const Vec3<T> &v) {
-    Vec3<T> v2 = v * v;
-    Vec3<T> v3 = v * v * v;
-    return 1 + v + v2 / 2 + v3 / 6;
-}
-
+//COMPLEX VECTOR MATHEMATICS
 template<typename T, typename U>
 T dot(const Vec3<T> &v, const Vec3<U> &w) {
     return v.x * w.x + v.y * w.y + v.z * w.z;

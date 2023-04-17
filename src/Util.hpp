@@ -15,10 +15,6 @@ namespace nrcc {
 
     std::complex<double> j = std::complex<double>(0, 1);
 
-    double golden_angle = pi * (3 - sqrt(5));
-
-    double golden_ratio = (1 + sqrt(5)) / 2;
-
     double impedance = 377;
 
     double lightspeed = 299792458;
@@ -92,11 +88,12 @@ namespace nrcc {
             {nrcc::Materials::swamp,    {0.1500,  1.3000}},
     };
 
-    std::vector<Vec3<double>> icosphere(int subdivs) {
-        const double X = 0.525731112119133606;
-        const double Z = 0.850650808352039932;
+    template<typename type>
+    std::vector<Vec3<type>> icosphere(int subdivs) {
+        const type X = 0.525731112119133606;
+        const type Z = 0.850650808352039932;
 
-        std::vector<Vec3<double>> vertices{
+        std::vector<Vec3<type>> vertices{
                 {-X, 0,  Z},
                 {X,  0,  Z},
                 {-X, 0,  -Z},
@@ -136,7 +133,7 @@ namespace nrcc {
 
         for (int i = 0; i < subdivs; ++i) {
             std::vector<Vec3<int>> fs;
-            std::vector<Vec3<double>> vs = vertices;
+            std::vector<Vec3<type>> vs = vertices;
 
             for (const auto &face: faces) {
                 int v1 = face.x;
@@ -146,9 +143,9 @@ namespace nrcc {
                 uint64_t v23 = v12 + 1;
                 uint64_t v31 = v12 + 2;
 
-                vs.push_back((vs[v1] * 0.5 + vs[v2] * 0.5).unit());
-                vs.push_back((vs[v2] * 0.5 + vs[v3] * 0.5).unit());
-                vs.push_back((vs[v3] * 0.5 + vs[v1] * 0.5).unit());
+                vs.push_back((vs[v1] * 0.5f + vs[v2] * 0.5f).unit());
+                vs.push_back((vs[v2] * 0.5f + vs[v3] * 0.5f).unit());
+                vs.push_back((vs[v3] * 0.5f + vs[v1] * 0.5f).unit());
 
                 fs.emplace_back(v1, v12, v31);
                 fs.emplace_back(v2, v23, v12);
@@ -162,7 +159,7 @@ namespace nrcc {
     }
 
     template<typename T>
-    type intersectionDistance(const Vec3<T> &origin, const Vec3<T> &direct, const Vec3<T> &center, const T &radius) {
+    T intersectionDistance(const Vec3<T> &origin, const Vec3<T> &direct, const Vec3<T> &center, const T &radius) {
         Vec3 length = origin - center;
 
         T a = dot(direct, direct);
@@ -190,6 +187,7 @@ namespace nrcc {
             else return -1;
         }
     }
+
 }
 
 #endif //NARCCISSUS_UTIL_HPP

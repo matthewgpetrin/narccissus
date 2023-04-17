@@ -24,7 +24,7 @@ public:
     std::vector<Wave>
     transmit(const type &power, const type &delay, const type &scaling_factor, const type &accuracy_factor) {
         std::vector<Vec3> wave_directions;
-        for (const Vec3 &direction: nrcc::icosphere(accuracy_factor)) {
+        for (const Vec3 &direction: nrcc::icosphere<type>(accuracy_factor)) {
             wave_directions.emplace_back(direction);
         }
 
@@ -57,8 +57,8 @@ public:
     Vec3 receive(std::vector<Wave> &waves) {
         std::vector<VecC> e_fields;
         for (auto &wave: waves) {
-            type d = intersectionDistance(wave.origin, wave.direct, coordinates, length);
-            if (d > 0) e_fields.push_back(wave.electricField(distance(wave.origin, coordinates)));
+            type d = nrcc::intersectionDistance(wave.origin, wave.direct, coordinates, length);
+            if (d > 0) e_fields.push_back(wave.electricField(length(wave.origin, coordinates)));
         }
         cmpx xx = 0;
         cmpx yx = 0;

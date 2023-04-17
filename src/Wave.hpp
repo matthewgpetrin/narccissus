@@ -3,7 +3,7 @@
 // Wave class with ray representation. Geometry (origin, direction) is computed on creation. Electromagnetic properties
 // are only initialized in origin or parent waves. Waves resulting from optical interaction exist with -7 initialized
 // variables until explicitly requested to save on computation. Upon request, wave will compute and save its EM
-// characteristics based on the "genesis" struct, which contains its parent wave, parent face, origin type, and distance
+// characteristics based on the "genesis" struct, which contains its parent wave, parent face, origin type, and length
 // from its parent wave's origin. Requests for EM characteristics call on parent waves recursively.
 //
 // Waves may either be constructed as parent waves, in which case the genesis variables are null, or as child waves, in
@@ -13,6 +13,7 @@
 #define NARCCISSUS_WAVE_HPP
 
 #include "Face.hpp"
+#include <iterator>
 
 template<typename type>
 class Wave {
@@ -23,34 +24,27 @@ class Wave {
 
 public:
     // VARIABLES
-    const Vec3 origin;
-    const Vec3 direct;
+    Vec3 origin;
+    Vec3 direct;
 
     struct {
         type frequency;
         type amplitude;
         type phase;
-        VecC polarization;
+        VecC polar;
     } initial;
 
     struct {
         Wave *wave;
         Face *face;
-        const type distance;
-        const nrcc::Interactions interaction;
+        type distance;
+        nrcc::Interactions interaction;
     } genesis;
 
 public:
     // ELECTROMAGNETIC PROPERTIES
-    // Note that in this implementation, only phase is actually distance dependent. Frequency shift based on interacting
-    // surface should be added eventually. Additionally, amplitude and polarization have the potential to change in
-    // more complex mediums than air.
-    //
-    // These functions first check if the "initial" values have been initialized. If not, they call the initializeEm()
-    // function, which will compute and store the "initial" values for future use.
-
     type frequency(const type &r) {
-        if (initial.frequency == -7.0) initializeEm();
+        if (initial.frequency == -7.0) initializeFreq();
 
         return initial.frequency;
     }
@@ -58,7 +52,7 @@ public:
     type amplitude(const type &r) {
         if (initial.amplitude == -7.0) initializeEm();
 
-        type a = 0;
+        type a = 0; // Dependent on medium
         return initial.amplitude * std::exp(-a * r);
     }
 
@@ -68,15 +62,22 @@ public:
         return wavenumber(r) * r + initial.phase;
     }
 
-    VecC polarization(const type &r) {
+    VecC polar(const type &r) {
         if (initial.amplitude == -7.0) initializeEm();
 
-        return initial.polarization;
+        return initial.polar;
     }
 
+    // Note that in this implementation, only phase is actually length dependent. Frequency shift based on interacting
+    // surface should be added eventually. Additionally, amplitude and polarization have the potential to change in
+    // more complex mediums than air.
+    //
+    // These functions first check if the "initial" values have been initialized. If not, they call the initializeEm()
+    // function, which will compute and store the "initial" values for future use.
+    //
     // Polarization is represented as vector of complex numbers. The real and imaginary components represent
     // a linear combination of two vectors that are orthogonal to each other. This, when included in the
-    // calculation for the E and H fields allows for the phase to react to non linear polarizations that rotate with phase
+    // calculation for the E and H fields allows for the phase to react to non-linear polarizations that rotate with phase
     //
     // Examples:
     // {0, 1, 0} j{0, 0, 0} Linearly polarized horizontally
@@ -105,7 +106,7 @@ public:
     // FIELD VECTOR METHODS
     // TODO: CHECK IF THIS SHOULD BE NEGATIVE OR NOT
     VecC electricField(const type &r) {
-        return polarization(r) * std::exp(phase(r) * nrcc::j) * amplitude(r);
+        return polar(r) * std::exp(phase(r) * nrcc::j) * amplitude(r);
     }
 
     // TODO: CHECK MAGNITUDE AND SIGN
@@ -115,54 +116,76 @@ public:
     }
 
     // EM PROPERTY INITIALIZER
-    void initializeEm() {
-        // INITIALIZE FREQUENCY
+    void initializeFreq() {
         initial.frequency = genesis.wave->frequency(genesis.distance);
+    }
 
-        // CALCULATE EH FIELD (FRESNEL EQUATIONS)
+    // TODO: CORRECT REFRACTION PROPERTIES
+    void initializeEm() {
+        if (initial.frequency == -7) initializeFreq();
+
         Vec3 n = genesis.face->normal();
         Vec3 t = genesis.face->bounds[0].unit();
 
         VecC Ei = genesis.wave->electricField(genesis.distance);
 
-        cmpx ni = {1, 0};
-        cmpx nt = {genesis.face->refractiveIndex(initial.frequency).real(), 0};
+        VecC Ep = n.cmpx() * dot(Ei, n) / pow(n.norm(), 2); // TODO: CHECK IF CONJUGATE NEEDED
+        VecC Es = Ei - Ep;
+
+        cmpx n1 = (genesis.wave->genesis.face == nullptr) ? cmpx(1) :
+                  genesis.wave->genesis.face->refractiveIndex(initial.frequency);
+        cmpx n2 = genesis.face->refractiveIndex(initial.frequency);
 
         cmpx cos_i = dot(Ei, n);
         cmpx sin_i = std::sqrt(cmpx(1.0) - cos_i * cos_i);
 
-        cmpx sin_t = ni / nt * sin_i;
+        cmpx sin_t = n1 / n2 * sin_i;
         cmpx cos_t = std::sqrt(cmpx(1.0) - sin_t * sin_t);
 
-        cmpx Rp = std::pow((ni * cos_i - nt * cos_t) / (ni * cos_i + nt * cos_t), 2);
-        cmpx Rs = std::pow((nt * cos_i - ni * cos_t) / (nt * cos_i + ni * cos_t), 2);
+        if (genesis.interaction == nrcc::reflection) {
+            cmpx rs = (n2 * cos_i - n1 * cos_t) / (n2 * cos_i + n1 * cos_t);
+            cmpx rp = (n1 * cos_i - n2 * cos_t) / (n1 * cos_i + n2 * cos_t);
 
-        VecC Es = cross(Ei, t);
-        VecC Ep = Ei - n.cmpx() * dot(Es, n);
+            VecC Er = Es * rs + Ep * rp;
 
-        VecC Er = Es * Rs + Ep * Rp;
+            initial.amplitude = Er.real().norm();
+            initial.phase = std::atan2(dot(Er.imag(), Er.real()), Er.real().norm());
+            initial.polar = shift(Er, direct).unit();
+        }
+        else if (genesis.interaction == nrcc::refraction) {
+            cmpx ts = (cmpx(2) * n1 * cos_i) / (n1 * cos_i = n2 * cos_t);
+            cmpx tp = (cmpx(2) * n1 * cos_i) / (n1 * cos_t = n2 * cos_i);
 
-        // INITIALIZE INITIAL VARIABLES
-        initial.amplitude = Er.real().norm();
+            VecC Et = Es * ts + Ep * tp;
 
-        initial.phase = std::atan2(dot(Er.imag(), Er.real()), Er.real().norm());
-
-        initial.polarization = shift(Er, direct).unit();
+            initial.amplitude = Et.real().norm();
+            initial.phase = std::atan2(dot(Et.imag(), Et.real()), Et.real().norm());
+            initial.polar = shift(Et, direct).unit();
+        }
     }
 
     // PARENT WAVE CONSTRUCTOR
-    Wave(const Vec3 &o, const Vec3 &d, const type &A, const type &f, const type &t, const VecC &p) :
-            origin(o),
-            direct(d),
-            initial{f, A, t, shift(p, d)},
+    Wave(const Vec3 &origin,
+         const Vec3 &direct,
+         const type &frequency,
+         const type &amplitude,
+         const type &phase,
+         const VecC &polar) :
+            origin(origin),
+            direct(direct),
+            initial{frequency, amplitude, phase, shift(polar, direct)},
             genesis{nullptr, nullptr, 0, nrcc::emission} {}
 
     // CHILD WAVE CONSTRUCTOR
-    Wave(const Vec3 &o, const Vec3 &d, Wave *w, Face *f, const nrcc::Interactions i) :
-            origin(o),
-            direct(d),
-            genesis{w, f, distance(w->origin, o), i},
-            initial{-7.0, -7.0, -7.0} {}
+    Wave(const Vec3 &origin,
+         const Vec3 &direct,
+         Wave *parent_wave,
+         Face *parent_face,
+         const nrcc::Interactions &interaction) :
+            origin(origin),
+            direct(direct),
+            genesis{parent_wave, parent_face, range(parent_wave->origin, origin), interaction},
+            initial{parent_wave->initial.frequency, -7.0, -7.0} {}
 };
 
 // OSTREAM
